@@ -562,35 +562,6 @@ class PedidoController extends Controller
     //	Muestra la lista de los pedidos que están pendientes de ser revisados
     public function listarsolicitados()
     {
-        // $usuario = Auth::user();
-		// //	Obtenemos los pedidos con estado solicitado
-		// $estadoSolicitado = EstadoPedido::where('nombre', 'solicitado')->firstOrFail();
-		// // $pedidos = Pedido::where('estado_pedido_id', $estadoSolicitado->id)->where('cancelado', false)
-        // // 	->with('usuarioRealizaPedido', 'proveedor', 'campo', 'sociedad', 'estadoPedido', 'direccion')->orderBy('created_at', 'ASC')->get();
-        
-        // //  Sólo mostremos los pedidos cuya pareja departamento-campo tenga permiso el usuario
-        // $query = DB::select(
-        //     'SELECT pedidos.id 
-        //     FROM pedidos
-        //     WHERE pedidos.estado_pedido_id = ?
-        //     AND (pedidos.departamento_id, pedidos.campo_id) IN
-        //         (SELECT campo_departamento.departamento_id, campo_departamento.campo_id
-        //         FROM users, usuario_puede_departamento_campo, campo_departamento
-        //         WHERE users.id = ?
-        //         AND users.id = usuario_puede_departamento_campo.usuario_id
-        //         AND usuario_puede_departamento_campo.campo_departamento_id = campo_departamento.id)'
-        //     , [$estadoSolicitado->id, $usuario->id]);
-
-        // //  Extremos todos los ID a un array para poder recuperar todos los pedidos con el metodo find
-        // $array_pedidos_id = array();
-        // foreach ($query as $registro) 
-        // {
-        //     array_push($array_pedidos_id, $registro->id);
-        // }
-
-        // //  Ahora recuperamos todos los pedidos resultado de la query
-        // $pedidos = Pedido::find($array_pedidos_id);
-
         $pedidos = Auth::user()->pedidosSegunEstado('solicitado');
 
 		//	La misma vista la vamos autilizar para mostrar las diferentes listas de pedidos, así que pasamos string para especificar en el título que estamos viendo
@@ -669,7 +640,7 @@ class PedidoController extends Controller
                     ]);
 
                     //  Si es ajax preparamos el mensaje de exito
-                    if($request->ajax())
+                    if($request != null && $request->ajax())
                     {
                         //  Prapramos el mensaje de respuesta que enviaremos a la vista
                         $mensaje = [
@@ -685,7 +656,7 @@ class PedidoController extends Controller
                 catch (\Exception $e) 
                 {
                     //  Si es ajax preparamos el mensaje de error
-                    if($request->ajax())
+                    if($request != null && $request->ajax())
                     {
                         $mensaje = [
                             'mensaje' => 'No se ha podido validar el pedido, contacta con el administrador',
@@ -717,39 +688,97 @@ class PedidoController extends Controller
         }
     }
 
+    //  Función que valida varios pedidos
+    public function validarvarios(Request $request)
+    {
+        //  Recuperamos los pedidos que vamos a validar
+        $pedidos = Pedido::find($request->input("pedidos"));
+
+        try
+        {
+            $estadoValidado = EstadoPedido::where('nombre', 'validado')->first();   //  Recuperamos el nuevo estado
+            
+            //  Preparamos una transacción ya que vamos a modificar varios pedidos
+            DB::beginTransaction();
+
+            foreach($pedidos as $pedido)
+            {
+                //  Lo validamos
+                $pedido->estado_pedido_id = $estadoValidado->id;
+                $pedido->save();
+
+                //  Registramos el nuevo cambio de estado de estado
+                HistoricoEstadoPedido::create([
+                    'pedido_id' => $pedido->id,
+                    'estado' => $estadoValidado->nombre,
+                    'usuario_id' => Auth::user()->id,
+                    'fecha' => date("Y-m-d H:i:s"),
+                ]);
+            }
+
+            DB::commit();
+
+            Session::flash('exito', 'Pedidos validados correctamente');
+
+            return redirect()->route("pedidos.listarsolicitados");
+        }
+        catch(\Exception $e)
+        {
+            DB::rollBack();
+
+            dd($e);
+
+            Session::flash('error', 'Ha ocurrido un error, contacta con el administrador');
+        }
+    }
+
+    //  Función que cursa varios pedidos
+    public function cursarvarios(Request $request)
+    {
+        //  Recuperamos los pedidos que vamos a validar
+        $pedidos = Pedido::find($request->input("pedidos"));
+
+        try
+        {
+            $estadoValidado = EstadoPedido::where('nombre', 'cursado')->first();   //  Recuperamos el nuevo estado
+            
+            //  Preparamos una transacción ya que vamos a modificar varios pedidos
+            DB::beginTransaction();
+
+            foreach($pedidos as $pedido)
+            {
+                //  Lo validamos
+                $pedido->estado_pedido_id = $estadoValidado->id;
+                $pedido->save();
+
+                //  Registramos el nuevo cambio de estado de estado
+                HistoricoEstadoPedido::create([
+                    'pedido_id' => $pedido->id,
+                    'estado' => $estadoValidado->nombre,
+                    'usuario_id' => Auth::user()->id,
+                    'fecha' => date("Y-m-d H:i:s"),
+                ]);
+            }
+
+            DB::commit();
+
+            Session::flash('exito', 'Pedidos cursados correctamente');
+
+            return redirect()->route("pedidos.listarvalidados");
+        }
+        catch(\Exception $e)
+        {
+            DB::rollBack();
+
+            dd($e);
+
+            Session::flash('error', 'Ha ocurrido un error, contacta con el administrador');
+        }
+    }
+
     //	Lista los pedidos que estan validados
     public function listarvalidados()
     {
-		// //	Obtenemos los pedidos con estado solicitado
-		// $estadoValidado = EstadoPedido::where('nombre', 'validado')->firstOrFail();
-		// // $pedidos = Pedido::where('estado_pedido_id', $estadoValidado->id)->where('cancelado', false)
-        // // 	->with('usuarioRealizaPedido', 'proveedor', 'campo', 'sociedad', 'estadoPedido', 'direccion')->orderBy('id')->get();
-        
-        // $usuario = Auth::user();
-
-        // //  Sólo mostremos los pedidos cuya pareja departamento-campo tenga permiso el usuario
-        // $query = DB::select(
-        //     'SELECT pedidos.id 
-        //     FROM pedidos
-        //     WHERE pedidos.estado_pedido_id = ?
-        //     AND (pedidos.departamento_id, pedidos.campo_id) IN
-        //         (SELECT campo_departamento.departamento_id, campo_departamento.campo_id
-        //         FROM users, usuario_puede_departamento_campo, campo_departamento
-        //         WHERE users.id = ?
-        //         AND users.id = usuario_puede_departamento_campo.usuario_id
-        //         AND usuario_puede_departamento_campo.campo_departamento_id = campo_departamento.id)'
-        //     , [$estadoValidado->id, $usuario->id]);
-
-        // //  Extremos todos los ID a un array para poder recuperar todos los pedidos con el metodo find
-        // $array_pedidos_id = array();
-        // foreach ($query as $registro) 
-        // {
-        //     array_push($array_pedidos_id, $registro->id);
-        // }
-
-        // //  Ahora recuperamos todos los pedidos resultado de la query
-        // $pedidos = Pedido::find($array_pedidos_id);
-
         $pedidos = Auth::user()->pedidosSegunEstado('validado');
 
 		//	La misma vista la vamos autilizar para mostrar las diferentes listas de pedidos, así que pasamos string para especificar en el título que estamos viendo
@@ -762,36 +791,6 @@ class PedidoController extends Controller
     //	Lista los pedidos que están cursados
     public function listarcursados()
     {
-    	// //	Obtenemos los pedidos con estado cursado
-		// $estado = EstadoPedido::where('nombre', 'cursado')->pluck('id');
-		// // $pedidos = Pedido::where('estado_pedido_id', $estado)->where('cancelado', false)
-		// // 	->with('usuarioRealizaPedido', 'proveedor', 'campo', 'sociedad', 'estadoPedido', 'direccion')->orderBy('created_at', 'ASC')->get();
-
-        // $usuario = Auth::user();
-
-        // //  Sólo mostremos los pedidos cuya pareja departamento-campo tenga permiso el usuario
-        // $query = DB::select(
-        //     'SELECT pedidos.id 
-        //     FROM pedidos
-        //     WHERE pedidos.estado_pedido_id = ?
-        //     AND (pedidos.departamento_id, pedidos.campo_id) IN
-        //         (SELECT campo_departamento.departamento_id, campo_departamento.campo_id
-        //         FROM users, usuario_puede_departamento_campo, campo_departamento
-        //         WHERE users.id = ?
-        //         AND users.id = usuario_puede_departamento_campo.usuario_id
-        //         AND usuario_puede_departamento_campo.campo_departamento_id = campo_departamento.id)'
-        //     , [$estado->id, $usuario->id]);
-
-        // //  Extremos todos los ID a un array para poder recuperar todos los pedidos con el metodo find
-        // $array_pedidos_id = array();
-        // foreach ($query as $registro) 
-        // {
-        //     array_push($array_pedidos_id, $registro->id);
-        // }
-
-        // //  Ahora recuperamos todos los pedidos resultado de la query
-        // $pedidos = Pedido::find($array_pedidos_id);
-
         $pedidos = Auth::user()->pedidosSegunEstado('cursado');
 
 		//	La misma vista la vamos autilizar para mostrar las diferentes listas de pedidos, así que pasamos string para especificar en el título que estamos viendo
@@ -804,45 +803,6 @@ class PedidoController extends Controller
     //  Lista los pedidos que están cursados
     public function listarpendientes()
     {
-        // //  Obtenemos los pedidos con estado cursado
-        // $estados = EstadoPedido::orWhere('nombre', 'pendiente_recibir')->orWhere('nombre', 'recibido_parcialmente')->pluck('id');
-        
-        // //  Creamos el string necesario a partir del array de estados para poder aplicarlo en el IN de nuestra consulta
-        // $array_estados_string = '(';
-        // for($i = 0; $i < count($estados); $i++)
-        // {
-        //     $array_estados_string .= $estados[$i];
-        //     if($i < count($estados) - 1)
-        //         $array_estados_string .= ', ';
-        //     else
-        //         $array_estados_string .= ')';
-        // }
-        
-        // $usuario = Auth::user();
-
-        // //  Sólo mostremos los pedidos cuya pareja departamento-campo tenga permiso el usuario
-        // $query = DB::select(
-        //     'SELECT pedidos.id 
-        //     FROM pedidos
-        //     WHERE pedidos.estado_pedido_id IN ' . $array_estados_string . '
-        //     AND (pedidos.departamento_id, pedidos.campo_id) IN
-        //         (SELECT campo_departamento.departamento_id, campo_departamento.campo_id
-        //         FROM users, usuario_puede_departamento_campo, campo_departamento
-        //         WHERE users.id = ?
-        //         AND users.id = usuario_puede_departamento_campo.usuario_id
-        //         AND usuario_puede_departamento_campo.campo_departamento_id = campo_departamento.id)'
-        //     , [$usuario->id]);
-
-        // //  Extremos todos los ID a un array para poder recuperar todos los pedidos con el metodo find
-        // $array_pedidos_id = array();
-        // foreach ($query as $registro) 
-        // {
-        //     array_push($array_pedidos_id, $registro->id);
-        // }
-
-        // //  Ahora recuperamos todos los pedidos resultado de la query
-        // $pedidos = Pedido::find($array_pedidos_id);
-
         $array_estados = ['pendiente_recibir', 'recibido_parcialmente'];
         $pedidos = Auth::user()->pedidosSegunEstados($array_estados);
 
@@ -861,10 +821,6 @@ class PedidoController extends Controller
         //  Ahora de los que hemos recuperado con ese estado, sólo nos quedamos con los que estén pedientes de comunicar al proveedor
         $pedidos = $pedidos->where('pedido_comunicado', false);        
         
-        // $estadosPosibles = EstadoPedido::whereIn('nombre', ['cursado', 'pendiente_recibir', 'recibido_parcialmente', 'finalizado'])->pluck('id');
-        // dd($estadosPosibles);
-        // $pedidos = Pedido::where('pedido_comunicado', false)->where('cancelado', false)->whereIn('estado_pedido_id', $estadosPosibles)->get();
-        // dd($pedidos);
         $titulo = 'Lista de pedidos pendientes de comunicar al proveedor';
         $tipoPedidos = 'sin_comunicar';
         return view('pedidos.listarpedidos', compact('pedidos', 'titulo', 'tipoPedidos'));
@@ -1097,11 +1053,6 @@ class PedidoController extends Controller
             $pedido->documento_visualizado = true;
             $pedido->save();
     
-            // dd($pedido);
-            // dd(array($pedido));
-            // $pdf = App::make('dompdf.wrapper');
-            // $pdf->loadHTML('<h1>Test</h1>');
-            // return $pdf->download('itsolutionstuff.pdf');    //  Descarga
             $datos = [
                 'pedido' => $pedido->toArray(),
                 'sociedad' => $pedido->sociedad->toArray(),
@@ -1113,30 +1064,9 @@ class PedidoController extends Controller
     
             $aux = Pedido::where('id', $pedido->id)->with('campo', 'proveedor', 'direccion', 'sociedad')->first()->toArray();
     
-            // dd($aux);
-    
             $lineas = LineaPedido::where('pedido_id', $pedido->id)->with('categoria', 'formato')->get()->toArray();
     
-            // dd($lineas);
-    
             $datos = ['pedido' => $aux, 'lineas' => $lineas];
-    
-            // dd($datos);
-    
-    
-            // return view('pedidos.plantillafactura', compact('datos'));
-    
-            // $dompdf =  new PDF();
-            // $dompdf->loadView('pedidos.plantillafactura');
-            // $dompdf->render();
-            // $dompdf->stream("MRA.pdf");
-    
-            // $data = ['title' => 'Welcome to HDTuto.com'];
-    
-            // //  Este funciona bien
-            // $pdf = new PDF();
-            // $pdf = set_base_path("/www/public/css/");
-            // $pdf = PDF::setOptions(['orientation' => 'landscape']);
             $pdf = PDF::loadView('pedidos.plantillafactura', $datos)->setPaper('a4', 'landscape');        
     
             return $pdf->stream();
@@ -1165,9 +1095,6 @@ class PedidoController extends Controller
     //  Muestra los pedidos que hemos guardados y tenemos pendientes de finalizar
     public function mispedidosguardados()
     {
-        // $estado = EstadoPedido::where('nombre', 'en_creacion')->firstOrFail();
-        // $pedidos = Pedido::where('estado_pedido_id', $estado->id)->where('usuario_realiza_pedido_id', Auth::user()->id)->orderBy('id')->get();
-
         $usuario = Auth::user();
 
         $pedidos = $usuario->pedidosSegunEstado('en_creacion');                 //  Recuperamos los pedidos con ese estado para los que el usuario tiene permiso
@@ -1280,10 +1207,6 @@ class PedidoController extends Controller
     //  Lista todos los pedidos que ha hecho un usuario
     public function listarpedidosusuario(User $usuario)
     {
-        // dd('pedidos de un usuario, por terminar');
-        // $pedidos = Pedido::where('usuario_realiza_pedido_id', $usuario->id)->orderBy('id')->get();
-        // $titulo = "Pedidos realizados por el usuario " . $usuario->nombre;
-
         //  Recuperamos todos los pedidos para los que tengo permiso
         $pedidos = Auth::user()->pedidosSegunEstados(['solicitado', 'validado', 'cursado', 'pendiente_recibir', 'recibido_parcialmente', 'finalizado']);
         //  Ahora filtramos por aquellos que ha creado el usuario

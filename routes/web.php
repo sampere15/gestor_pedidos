@@ -82,6 +82,8 @@ Route::middleware(['auth'])->group(function(){
 		Route::put('/pedidos/{pedido}/cancelar', 'PedidoController@cancelar')->name('pedidos.cancelar')->middleware('has.permission:pedidos.cancelar');
 		Route::put('/pedidos/{pedido}/eliminar', 'PedidoController@eliminar')->name('pedidos.eliminar')->middleware('has.permission:pedidos.eliminar');
 		Route::get('/pedidos/listartodos', 'PedidoController@listartodos')->name('pedidos.listartodos')->middleware('has.permission:pedidos.listartodos');
+		Route::put("/pedidos/validarvarios", "PedidoController@validarvarios")->name("pedidos.validarvarios")->middleware("has.permission:pedidos.validar");
+		Route::put("/pedidos/cursarvarios", "PedidoController@cursarvarios")->name("pedidos.cursarvarios")->middleware("has.permission:pedidos.cursar");
 
 	//	OJO, NO ESTÁ PROTEGIDA ESTA RUTA CON EL MIDDLEWARE
 		Route::post('/pedidos/{pedido}/observaciones', 'PedidoController@observaciones');

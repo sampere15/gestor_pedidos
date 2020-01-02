@@ -169,6 +169,7 @@ class User extends Authenticatable
             "SELECT pedidos.id 
             FROM pedidos
             WHERE pedidos.estado_pedido_id = ?
+            AND pedidos.cancelado = false
             AND (pedidos.departamento_id, pedidos.campo_id) IN
                 (SELECT campo_departamento.departamento_id, campo_departamento.campo_id
                 FROM usuario_puede_departamento_campo, campo_departamento

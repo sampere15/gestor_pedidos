@@ -5,14 +5,28 @@
         <div id="resultadoOperacion" class="alert alert-success" role="alert" hidden="true">Mensaje de resultado</div>
     </div>
 
-	<h2>{{ $titulo }}</h2>
+    <h2>{{ $titulo }}</h2>
+    
+    @if($tipoPedidos == "solicitados" || $tipoPedidos == "validados")
+        <form id="form-validar-cursar-varios" action="{{ $tipoPedidos == "solicitados" ? route("pedidos.validarvarios") : route("pedidos.cursarvarios") }}" method="POST">
+            @csrf
+            @method("PUT")
+    @endif
 
 	<div class="row">
         <div class="col-xs-12 col-sm-12">
+            <button type="button" class="btn btn-lg btn-success" id="btn-accion-todos" style="display: none">
+                @if($tipoPedidos == "solicitados")
+                    Validar todos los pedidos marcados
+                @elseif($tipoPedidos == "validados")
+                    Cursar todos los pedidos marcados
+                @endif
+            </button>
             <table id="tablaListadoPedidos" class="table table-condensed table-striped"  style="width: 100%">
                 <thead>
-                    <tr>
-                        <th width="10px"><input type="checkbox" name="checkTodosPedidos"></th>
+                        @if($tipoPedidos == "solicitados" || $tipoPedidos == "validados")
+                            <th width="10px"><input type="checkbox" onclick="CheckboxTodosPulsado(this);"></th>
+                        @endif
                         <th>Nº</th>
                         <th width="12%">Fecha creación</th>
                         <th>Departamento</th>
@@ -41,7 +55,9 @@
                         @else
                         <tr>
                         @endif
-                            <td><input type="checkbox" name="checkTodosPedidos"></td>
+                            @if($tipoPedidos == "solicitados" || $tipoPedidos == "validados")
+                                <td><input type="checkbox" class="cb-pedido" name="pedidos[]" value="{{ $pedido->id }}"></td>
+                            @endif
                             <td>{{ $pedido->id }}</td>
                             <td>{{ $pedido->created_at }}</td>
                             <td>{{ $pedido->departamento->nombre }}</td>
@@ -67,13 +83,13 @@
                             @endcan
                             @if($tipoPedidos == "solicitados" && Auth::user()->can('pedidos.validar'))
                                 <td width="10px">
-                                    <button class="btn btn-sm btn-success btnCambiarEstado" id="btnCambiarEstado{{ $pedido->id }}" data-pedido_id="{{ $pedido->id }}">
+                                    <button type="button" class="btn btn-sm btn-success btnCambiarEstado" id="btnCambiarEstado{{ $pedido->id }}" data-pedido_id="{{ $pedido->id }}">
                                         Validar pedido
                                     </button>
                                 </td>
-                            @elseif($tipoPedidos == "validados" && Auth::user()->can('pedidos.cursar'))
+                            @elseif($tipoPedidos == "validados" && Auth::user()->can('pedidos.cursar') && !$pedido->cancelado)
                                 <td>
-                                    <button class="btn btn-sm btn-success btnCambiarEstado" id="btnCambiarEstado{{ $pedido->id }}" data-pedido_id="{{ $pedido->id }}">
+                                    <button type="button" class="btn btn-sm btn-success btnCambiarEstado" id="btnCambiarEstado{{ $pedido->id }}" data-pedido_id="{{ $pedido->id }}">
                                         Cursar pedido
                                     </button>
                                 </td>
@@ -90,6 +106,10 @@
             </table>
         </div>
     </div>
+
+    @if($tipoPedidos == "solicitados" || $tipoPedidos == "validados")
+        </form>
+    @endif
 
     @if(Auth::user()->can('pedidos.validar') || Auth::user()->can('pedidos.verdetalles'))
         <!-- Modal para validar el pedido -->
@@ -256,5 +276,38 @@
             $('#resultadoOperacion').html(mensaje);
             $('#resultadoOperacion').show(1000).delay(2000).hide(500);
         }
+
+        //  Es llamado cuando pulsamos sobre el checkbox de seleccionar todos los pedidos
+        function CheckboxTodosPulsado(elemento)
+        {
+            if(elemento.checked)
+            {
+                document.getElementById("btn-accion-todos").style.display = "block";
+                MarcarDescarmarCheckboxes(true);
+            }
+            else
+            {
+                document.getElementById("btn-accion-todos").style.display = "none";
+                MarcarDescarmarCheckboxes(false);
+            }
+        }
+
+        //  Marca o desmarca todos los checkboxes de la lista de pedidos
+        function MarcarDescarmarCheckboxes(valor)
+        {
+            $cbpedidos = document.getElementsByClassName("cb-pedido");
+            
+            for($i = 0; $i < $cbpedidos.length; $i++)
+            {
+                $cbpedidos[$i].checked = valor;
+            }
+        }
+
+        //  Envía el formulario para validarcursar varios pedidos
+        $("#btn-accion-todos").click(function()
+        {
+            document.getElementById("form-validar-cursar-varios").submit();
+        });
+        
     </script>
 @endpush
