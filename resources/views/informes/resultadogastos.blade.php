@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@push('csstopafter')
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.20/b-1.6.1/b-colvis-1.6.1/b-html5-1.6.1/datatables.min.css"/>
+@endpush
+
 @section('content')
 
 	{{-- Incluimos el HTML relativo a los filtros disponibles para el informe --}}
@@ -89,6 +93,12 @@
 					"search": "Buscar: "
 				},
 				"order": [[ 0, "asc" ]],
+				dom: 'Bfrtip',
+                buttons: [
+                    'copyHtml5',
+                    'excelHtml5',
+                    'pdfHtml5'
+                ]
 			});
 		});
 	
