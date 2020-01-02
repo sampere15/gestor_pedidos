@@ -78,7 +78,7 @@
                     "infoFiltered": "(filtrado de _MAX_ registros totales)",
                     "search": "Buscar: "
                 },
-                "order": [[ 1, "desc" ]],
+                "order": [[ 0, "desc" ]],
                 "searching": true,
             });
         } );
