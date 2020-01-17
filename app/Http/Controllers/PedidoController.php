@@ -28,8 +28,8 @@ class PedidoController extends Controller
     public function crear()
     {
     	$proveedores = Proveedor::where('activo', true)->orderBy('nombre', 'asc')->get();
-    	$categorias = Categoria::where('activo', true)->get();						//	Recuperamos las categorias
-    	$formatos = Formato::where('activo', true)->get();							//	Recuperamos los formatos
+    	$categorias = Categoria::where('activo', true)->orderBy('nombre')->get();						//	Recuperamos las categorias
+    	$formatos = Formato::where('activo', true)->orderBy('nombre')->get();							//	Recuperamos los formatos
     	$usuario = Auth::user();
         
         $departamentos = $usuario->departamentosConPermiso();
