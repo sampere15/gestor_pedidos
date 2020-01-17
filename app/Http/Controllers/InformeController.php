@@ -29,7 +29,8 @@ class InformeController extends Controller
     	$sociedades = Sociedad::all();
     	// $usuarios = User::all();
     	$categorias = Categoria::all();
-    	$estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		// $estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		$estadosPedidos = EstadoPedido::whereIn('nombre', ["cursado", "pendiente_recibir", "recibido_parcialmente", "finalizado"])->get();
 
 		return view('informes.formulariogastos', compact('usuario', 'proveedores', 'departamentos', 'campos', 'sociedades', 'usuarios', 'categorias', 'estadosPedidos'));
 		// return view('informes.test', compact('proveedores', 'departamentos', 'campos', 'sociedades', 'usuarios', 'categorias', 'estadosPedidos'));
@@ -207,7 +208,8 @@ class InformeController extends Controller
     	$sociedades = Sociedad::all();
     	$usuarios = User::all();
     	$categorias = Categoria::all();
-		$estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		// $estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		$estadosPedidos = EstadoPedido::whereIn('nombre', ["cursado", "pendiente_recibir", "recibido_parcialmente", "finalizado"])->get();
 
 		$departamentos = $usuario->departamentosConPermiso();
 		$campos = $usuario->camposConPermiso();
@@ -542,7 +544,8 @@ class InformeController extends Controller
 		$proveedores = Proveedor::all();
     	$sociedades = Sociedad::all();
     	$categorias = Categoria::all();
-		$estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		// $estadosPedidos = EstadoPedido::where('nombre', '<>', 'en_creacion')->get();
+		$estadosPedidos = EstadoPedido::whereIn('nombre', ["cursado", "pendiente_recibir", "recibido_parcialmente", "finalizado"])->get();
 
 		$departamentos = $usuario->departamentosConPermiso();
 		$campos = $usuario->camposConPermiso();
