@@ -127,7 +127,7 @@ Route::middleware(['auth'])->group(function(){
 	////////////////
 
 	//	Rutas categorías
-		Route::get('/categorias/listar', 'CategoriaController@listar')->name('categorias.listar')->middleware('has.permission:categorias.listsar');
+		Route::get('/categorias/listar', 'CategoriaController@listar')->name('categorias.listar')->middleware('has.permission:categorias.listar');
 		Route::get('/categorias/crear', 'CategoriaController@crear')->name('categorias.crear')->middleware('has.permission:categorias.crear');
 		Route::post('/categorias/guardar', 'CategoriaController@guardar')->name('categorias.guardar')->middleware('has.permission:categorias.crear');
 		Route::get('/categorias/{categoria}/editar', 'CategoriaController@editar')->name('categorias.editar')->middleware('has.permission:categorias.editar');
