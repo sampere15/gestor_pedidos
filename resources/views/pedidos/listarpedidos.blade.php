@@ -56,7 +56,7 @@
                         <tr>
                         @endif
                             @if($tipoPedidos == "solicitados" || $tipoPedidos == "validados")
-                                <td><input type="checkbox" class="cb-pedido" name="pedidos[]" value="{{ $pedido->id }}"></td>
+                                <td><input type="checkbox" class="cb-pedido" name="pedidos[]" value="{{ $pedido->id }}" onclick="CheckboxMarcado();"></td>
                             @endif
                             <td>{{ $pedido->id }}</td>
                             <td>{{ $pedido->created_at }}</td>
@@ -290,6 +290,26 @@
                 document.getElementById("btn-accion-todos").style.display = "none";
                 MarcarDescarmarCheckboxes(false);
             }
+        }
+
+        //  Para validar varios pedidos pero no todos
+        function CheckboxMarcado()
+        {
+            //  Comprobamos si hay algún pedido marcado, para mostrar u ocultar el botón
+            $cbpedidos = document.getElementsByClassName("cb-pedido");
+
+            for($i = 0; $i < $cbpedidos.length; $i++)
+            {
+                //  Si hay algún pedido marcado mostraremos el botón y saldremos de la función
+                if($cbpedidos[$i].checked)
+                {
+                    document.getElementById("btn-accion-todos").style.display = "block";
+                    return;
+                }
+            }
+
+            //  Si hemos llegado a este punto es que no hay ningún checkbox marcado y por lo tanto ocultaremos el botón en caso de que estuviera visible
+            document.getElementById("btn-accion-todos").style.display = "none";
         }
 
         //  Marca o desmarca todos los checkboxes de la lista de pedidos
