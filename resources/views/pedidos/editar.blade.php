@@ -116,6 +116,8 @@
 							<tbody>
 								@foreach ($pedido->lineasPedido as $lineaPedido)
 									<tr id="lineaPedido{{ $lineaPedido->numero_linea }}">
+										<input type="hidden" name="estado_linea_id{{ $lineaPedido->numero_linea }}" value="{{ $lineaPedido->estado_linea_id }}">
+
 										<td class="linea_pedido_id" name="linea_pedido{{ $lineaPedido->numero_linea }}">{{ $lineaPedido->numero_linea }}</td>
 										<td>
 											<select class="form-control" id="selectCategoria{{ $lineaPedido->numero_linea }}" name="selectCategoria{{ $lineaPedido->numero_linea }}">

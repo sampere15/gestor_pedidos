@@ -106,7 +106,7 @@ class PedidoController extends Controller
         		//	A la función en este caso le pasaríamos todos los datos de la request y por ejemplo un 2. Así sabe que tiene que sacar los datos de 
         		//	selectCategoria2, inputPrecio2, etc....
                 // $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, substr($datos, strlen($datos)-1), $pedido->ya_recibido);
-                $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido);
+                $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido, false);
 
         		//	Antes de hacer el push comprobamos que las líneas cumplen la validación. Para ellos creamos un objeto request y lo pasamos a validar
     			$request = new Request([
@@ -276,7 +276,8 @@ class PedidoController extends Controller
                     // $indice = explode("selectCategoria", );
                     // dd($indice);
                     // $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, substr($datos, strlen($datos)-1), $pedido->ya_recibido);
-                    $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido);
+                    // dd($datosPedidoTodo);
+                    $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido, true);
 
                     //  Antes de hacer el push comprobamos que las líneas cumplen la validación. Para ellos creamos un objeto request y lo pasamos a validar
                     $request = new Request([
@@ -386,7 +387,7 @@ class PedidoController extends Controller
 
     //	Extrae la línea pedido con el índice indicado
     // private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $indice, $pedido_ya_recibido)
-    private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $pedido_ya_recibido)
+    private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $pedido_ya_recibido, $editando)
     {
     	//	Creamos una nueva linea y la rellenamos con los datos del pedido. Los datos los extrae de la request que nos viene con los datos del form
     	// $linea = new LineaPedido();
@@ -404,6 +405,9 @@ class PedidoController extends Controller
     	$linea->precio = round($datosPedido["inputPrecio" . $indiceLineaPedido], 2);
     	$linea->categoria_id = $datosPedido["selectCategoria" . $indiceLineaPedido];
         $linea->formato_id = $datosPedido["selectFormato" . $indiceLineaPedido];
+
+        if($editando)
+            $linea->estado_linea_id = $datosPedido["estado_linea_id" . $indiceLineaPedido];
         
         //  Si se ha marcado que el pedido ya se ha recibido, marcaremos las líneas como recibidas
         if($pedido_ya_recibido)
