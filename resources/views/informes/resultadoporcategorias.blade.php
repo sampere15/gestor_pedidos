@@ -15,7 +15,7 @@
 
 	<div class="row">
 		<div class="col-md-12 col-sm-12 col-xs-12">
-			<table id="tablaResultado class="table table-condensed table-striped"  style="width: 50%">
+			<table id="tablaResultado" class="table table-condensed table-striped"  style="width: 50%">
 	            <thead>
 	                <tr>
 	                    <th>Categoría</th>
