@@ -263,7 +263,7 @@ class PedidoController extends Controller
             ]);
 
             //  Vamos a recorrer los datos para saber cuantas líneas de pedido nos llegan
-            foreach ($datosPedidoTodo as $datos => $valor) 
+            foreach ($datosPedidoTodo as $datos => $valor)
             {
                 //  Como se pueden añadir o quitar líneas de pedido no sabemos que numeración van a tener "selectCategoria1, selectCategoria2..."
                 //  Entonces cada vez que encontremos un selectCategoria vemos con que número viene y obtenemos los datos de esa línea con una función
@@ -398,6 +398,8 @@ class PedidoController extends Controller
     	// $linea->categoria_id = $datosPedido["selectCategoria" . $indice];
         // $linea->formato_id = $datosPedido["selectFormato" . $indice];
 
+        // dd($datosPedido);
+
         $linea = new LineaPedido();
     	$linea->numero_linea = $indiceLineaPedido;
     	$linea->descripcion = $datosPedido["inputDescripcion" . $indiceLineaPedido];
@@ -406,8 +408,11 @@ class PedidoController extends Controller
     	$linea->categoria_id = $datosPedido["selectCategoria" . $indiceLineaPedido];
         $linea->formato_id = $datosPedido["selectFormato" . $indiceLineaPedido];
 
-        if($editando)
-            $linea->estado_linea_id = $datosPedido["estado_linea_id" . $indiceLineaPedido];
+        //  Recuperamos el estado de la líena de pedido si es que tiene
+        if($editando && array_key_exists("estado_linea_" . $indiceLineaPedido, $datosPedido))
+        {
+            $linea->estado_linea_id = $datosPedido["estado_linea_" . $indiceLineaPedido];
+        }
         
         //  Si se ha marcado que el pedido ya se ha recibido, marcaremos las líneas como recibidas
         if($pedido_ya_recibido)

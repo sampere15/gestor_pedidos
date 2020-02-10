@@ -116,7 +116,7 @@
 							<tbody>
 								@foreach ($pedido->lineasPedido as $lineaPedido)
 									<tr id="lineaPedido{{ $lineaPedido->numero_linea }}">
-										<input type="hidden" name="estado_linea_id{{ $lineaPedido->numero_linea }}" value="{{ $lineaPedido->estado_linea_id }}">
+										<input type="hidden" name="estado_linea_{{ $lineaPedido->numero_linea }}" value="{{ $lineaPedido->estado_linea_id }}">
 
 										<td class="linea_pedido_id" name="linea_pedido{{ $lineaPedido->numero_linea }}">{{ $lineaPedido->numero_linea }}</td>
 										<td>
@@ -709,6 +709,9 @@
         	//	Añadimos el botón para eliminar la línea de pedido
         	nuevaLinea.insertCell(7).innerHTML = 
         		'<a class="btn btn-sm btn-danger btnEliminarLineaPedido" onclick="BtnEliminarLineaPedido(this)") data-toggle="modal" data-target="#eliminarLineaModal"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>';
+
+			// document.getElementById("formularioEditarPedido").innerHTML += 
+			// `<input type="hidden" name="estado_linea_{{ $lineaPedido->numero_linea }}" value="{{ $lineaPedido->estado_linea_id }}">`
         }
 
         //	Función que actualiza el total de la linea de pedido
