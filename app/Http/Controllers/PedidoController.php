@@ -273,11 +273,8 @@ class PedidoController extends Controller
                     //  selectCategoria2, inputPrecio2, etc....
 
                     //  Extraemos su índice de línea
-                    // $indice = explode("selectCategoria", );
-                    // dd($indice);
-                    // $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, substr($datos, strlen($datos)-1), $pedido->ya_recibido);
-                    // dd($datosPedidoTodo);
-                    $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido, true);
+                    $indiceLineaReal = explode("selectCategoria", $datos);  //  Recuperamos el índice real, ya que se pueden haber borrado líneas del pedido
+                    $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaReal[1], $indiceLineaPedido, $pedido->ya_recibido, true);
 
                     //  Antes de hacer el push comprobamos que las líneas cumplen la validación. Para ellos creamos un objeto request y lo pasamos a validar
                     $request = new Request([
@@ -387,31 +384,21 @@ class PedidoController extends Controller
 
     //	Extrae la línea pedido con el índice indicado
     // private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $indice, $pedido_ya_recibido)
-    private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $pedido_ya_recibido, $editando)
+    // private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaPedido, $pedido_ya_recibido, $editando)
+    private function ExtraerDatosLineaPedido($datosPedido, $indiceLineaReal, $indiceLineaPedido, $pedido_ya_recibido, $editando)
     {
-    	//	Creamos una nueva linea y la rellenamos con los datos del pedido. Los datos los extrae de la request que nos viene con los datos del form
-    	// $linea = new LineaPedido();
-    	// $linea->numero_linea = $indiceLineaPedido;
-    	// $linea->descripcion = $datosPedido["inputDescripcion" . $indice];
-    	// $linea->unidades = $datosPedido["inputUnidades" . $indice];
-    	// $linea->precio = round($datosPedido["inputPrecio" . $indice], 2);
-    	// $linea->categoria_id = $datosPedido["selectCategoria" . $indice];
-        // $linea->formato_id = $datosPedido["selectFormato" . $indice];
-
-        // dd($datosPedido);
-
         $linea = new LineaPedido();
     	$linea->numero_linea = $indiceLineaPedido;
-    	$linea->descripcion = $datosPedido["inputDescripcion" . $indiceLineaPedido];
-    	$linea->unidades = $datosPedido["inputUnidades" . $indiceLineaPedido];
-    	$linea->precio = round($datosPedido["inputPrecio" . $indiceLineaPedido], 2);
-    	$linea->categoria_id = $datosPedido["selectCategoria" . $indiceLineaPedido];
-        $linea->formato_id = $datosPedido["selectFormato" . $indiceLineaPedido];
+    	$linea->descripcion = $datosPedido["inputDescripcion" . $indiceLineaReal];
+    	$linea->unidades = $datosPedido["inputUnidades" . $indiceLineaReal];
+    	$linea->precio = round($datosPedido["inputPrecio" . $indiceLineaReal], 2);
+    	$linea->categoria_id = $datosPedido["selectCategoria" . $indiceLineaReal];
+        $linea->formato_id = $datosPedido["selectFormato" . $indiceLineaReal];
 
         //  Recuperamos el estado de la líena de pedido si es que tiene
-        if($editando && array_key_exists("estado_linea_" . $indiceLineaPedido, $datosPedido))
+        if($editando && array_key_exists("estado_linea_" . $indiceLineaReal, $datosPedido))
         {
-            $linea->estado_linea_id = $datosPedido["estado_linea_" . $indiceLineaPedido];
+            $linea->estado_linea_id = $datosPedido["estado_linea_" . $indiceLineaReal];
         }
         
         //  Si se ha marcado que el pedido ya se ha recibido, marcaremos las líneas como recibidas

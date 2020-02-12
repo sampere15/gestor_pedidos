@@ -180,22 +180,16 @@
 				<label for="observaciones">Observaciones:</label>
 				<textarea class="form-control" id="observaciones" name="observaciones" rows="5">{{ $pedido->observaciones }}</textarea>
 				</div>
-			{{-- <div class="row col-md-12 col-sm-12 col-xs-12">
-				<button class="btn btn-lg btn-success pull-right" id="btnSolicitarPedido">Actualizar pedido</button>
-			</div> --}}
 			<div class="row col-md-12 col-sm-12 col-xs-12">
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					@if($pedido->estadoPedido->nombre == "en_creacion")
-						{{-- <a class="btn btn-lg btn-default" id="btnGuardarYContinuar">Guardar y continuar más tarde</a> --}}
 						<input type="submit" class="btn btn-lg btn-default" id="btnGuardarYContinuar" value="Guardar y continuar más tarde">
 					@endif
 				</div>
 				<div class="col-md-6 col-sm-6 col-xs-6">
 					@if($pedido->estadoPedido->nombre == "en_creacion")
-						{{-- <a class="btn btn-lg btn-success pull-right" id="btnSolicitarPedido">Tramitar pedido</a> --}}
 						<input type="submit" class="btn btn-lg btn-success pull-right" id="btnSolicitarPedido" value="Tramitar pedido">
 					@else
-						{{-- <a class="btn btn-lg btn-success pull-right" id="btnSolicitarPedido">Actualizar</a> --}}
 						<input type="submit" class="btn btn-lg btn-success pull-right" id="btnSolicitarPedido" value="Actualizar">
 					@endif
 				</div>
@@ -326,8 +320,6 @@
 	</div>
 	{{-- Fin del modal eliminar línea --}}
 
-	
-
 @endsection
 
 @push('footscripts')
@@ -431,14 +423,6 @@
         {
         	$('#tramitarPedido').attr('value', true);
         });
-
-		// function DepartamentoSeleccionado()
-		// {
-		// 	//	Vamos a vaciar el select de direcciones para evitar que se quede una ahí seleccionada
-		// 	document.getElementById("sociedadSelect").innerHTML = "<option value=''>-- Seleccione una --</option>";
-
-		// 	ActualizarCampos();
-		// }
 		
 		//	Una vez seleccionado un departamento vamos a cargar los campos para los que el usuario tiene permiso para ese departamento
 		function ActualizarCampos()
@@ -500,27 +484,6 @@
 				CampoSeleccionado();
 			}
 		}	
-
-        // //	Cuando cambia de campo en el select, tenemos que recuperar los datos de sus sociedades, direcciones y departamentos
-        // function ActualizarDatos()
-        // {
-        // 	//	Recuperamos el ID del campo que hemos seleccionado
-        // 	campoSeleccionado_id = document.getElementById("campoSelect").value;
-        // 	//	Actualizamos los datos de la sociedad y sólo mostramos los que podamos usar con el campo seleccionado
-        // 	ActualizarDatosSocidades();
-
-        // 	//	Actualizamos los departamentos que tenga este campo
-        // 	ActualizarDatosDepartamentos();
-
-        // 	//	Como hemos cambiado de campo, revisamos si tenemos las direcciones de este campo ya descargadas
-        // 	if(ComprobarSiDireccionCampoDescargadas() == false)
-        // 	// {
-        // 		// console.log('direcciones no descargadas');
-        // 		DescargarDirecciones(campoSeleccionado_id);		//	Descargamos las direcciones del campo indicado
-        // 	// }
-        // 	// else
-        // 		// console.log('direcciones descargadas');
-        // }
 
 		//	Es llamado una vez pulsamos sobre un campo
 		function CampoSeleccionado()
@@ -709,9 +672,6 @@
         	//	Añadimos el botón para eliminar la línea de pedido
         	nuevaLinea.insertCell(7).innerHTML = 
         		'<a class="btn btn-sm btn-danger btnEliminarLineaPedido" onclick="BtnEliminarLineaPedido(this)") data-toggle="modal" data-target="#eliminarLineaModal"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>';
-
-			// document.getElementById("formularioEditarPedido").innerHTML += 
-			// `<input type="hidden" name="estado_linea_{{ $lineaPedido->numero_linea }}" value="{{ $lineaPedido->estado_linea_id }}">`
         }
 
         //	Función que actualiza el total de la linea de pedido
