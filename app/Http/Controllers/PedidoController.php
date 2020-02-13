@@ -106,7 +106,9 @@ class PedidoController extends Controller
         		//	A la función en este caso le pasaríamos todos los datos de la request y por ejemplo un 2. Así sabe que tiene que sacar los datos de 
         		//	selectCategoria2, inputPrecio2, etc....
                 // $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, substr($datos, strlen($datos)-1), $pedido->ya_recibido);
-                $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido, false);
+                $indiceLineaReal = explode("selectCategoria", $datos);  //  Recuperamos el índice real, ya que se pueden haber borrado líneas del pedido
+                // $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaPedido, $pedido->ya_recibido, false);
+                $lineaPedido = $this->ExtraerDatosLineaPedido($datosPedidoTodo, $indiceLineaReal[1], $indiceLineaPedido, $pedido->ya_recibido, true);
 
         		//	Antes de hacer el push comprobamos que las líneas cumplen la validación. Para ellos creamos un objeto request y lo pasamos a validar
     			$request = new Request([
