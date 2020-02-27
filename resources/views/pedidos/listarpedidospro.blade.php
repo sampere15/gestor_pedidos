@@ -10,6 +10,7 @@
                     <tr>
                     	<th width="10px">Nº</th>
                         <th>Fecha creación</th>
+                        <th>Fecha pedido</th>
                         <th>Departamento</th>
 	                    <th>Campo</th>
 	                    <th>Proveedor</th>
@@ -29,6 +30,7 @@
                         @endif
                 			<td>{{ $pedido->id }}</td>
                             <td>{{ $pedido->created_at }}</td>
+                            <td>{{ $pedido->fecha_pedido != null ? $pedido->fecha_pedido : "TBD" }}</td>
                             <td><a href="{{ route('departamentos.verdetalles', $pedido->departamento) }}">{{ $pedido->departamento->nombre }}</a></td>
                 			<td>
                 				<a href="{{ route('campos.verdetalles', $pedido->campo) }}">{{ $pedido->campo->nombre }}</a>

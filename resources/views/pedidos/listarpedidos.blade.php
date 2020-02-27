@@ -29,6 +29,7 @@
                         @endif
                         <th>Nº</th>
                         <th width="12%">Fecha creación</th>
+                        <th width="12%">Fecha pedido</th>
                         <th>Departamento</th>
                         <th>Campo</th>
                         <th width="15%">Proveedor</th>
@@ -60,6 +61,7 @@
                             @endif
                             <td>{{ $pedido->id }}</td>
                             <td>{{ $pedido->created_at }}</td>
+                            <td>{{ $pedido->fecha_pedido != null ? $pedido->fecha_pedido : "TBD" }}</td>
                             <td>{{ $pedido->departamento->nombre }}</td>
                             <td>{{ $pedido->campo->nombre }}</td>
                             <td>{{ $pedido->proveedor->nombre }}</td>
