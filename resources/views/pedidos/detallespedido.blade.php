@@ -96,7 +96,11 @@
                 <h3>Solicita el pedido: <small>{{ $pedido->usuarioRealizaPedido->nombre }}</small></h3>
             </div>
             <div class="col-md-3 col-sm-3">
-                <h3>Fecha creación: <small>{{ $pedido->created_at }}</small></h3>
+                @if($pedido->fecha_pedido != null)
+                    <h3>Fecha pedido: <small>{{ $pedido->fecha_pedido }}</small></h3>
+                @else
+                    <h3>Fecha creación: <small>{{ $pedido->created_at }}</small></h3>
+                @endif
             </div>
         </div>
     </div>

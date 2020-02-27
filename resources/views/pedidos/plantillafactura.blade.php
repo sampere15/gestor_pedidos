@@ -93,13 +93,13 @@
 			</tr>
 			<tr>
 				<td colspan="4">{{ $pedido['proveedor']['nombre'] }}</td>
-				<td colspan="2">{{ $pedido['created_at'] }}</td>
+				<td colspan="2">{{ $pedido['fecha_pedido'] }}</td>
 				<td colspan="4">{{ $pedido['campo']['nombre'] }}</td>
 				<td colspan="2">{{ $pedido['id'	] }}</td>
 			</tr>
 		</table>
 		<hr style="text-decoration: none;border: 0px white">
-		<table <table width="100%">
+		<table width="100%">
 			<tr>
 				<td>{{ $pedido['solicitado_al_proveedor'] }}</td>
 				<td>{{ $pedido['ya_recibido'] }}</td>
