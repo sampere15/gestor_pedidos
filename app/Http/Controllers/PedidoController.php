@@ -747,6 +747,7 @@ class PedidoController extends Controller
             {
                 //  Lo validamos
                 $pedido->estado_pedido_id = $estadoValidado->id;
+                $pedido->fecha_pedido = date("Y-m-d H:i:s");
                 $pedido->save();
 
                 //  Registramos el nuevo cambio de estado de estado
