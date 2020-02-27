@@ -740,6 +740,8 @@ class PedidoController extends Controller
         {
             $estadoValidado = EstadoPedido::where('nombre', 'cursado')->first();   //  Recuperamos el nuevo estado
             
+            $fecha = date("Y-m-d H:i:s");
+
             //  Preparamos una transacción ya que vamos a modificar varios pedidos
             DB::beginTransaction();
 
@@ -747,7 +749,7 @@ class PedidoController extends Controller
             {
                 //  Lo validamos
                 $pedido->estado_pedido_id = $estadoValidado->id;
-                $pedido->fecha_pedido = date("Y-m-d H:i:s");
+                $pedido->fecha_pedido = $fecha;
                 $pedido->save();
 
                 //  Registramos el nuevo cambio de estado de estado
