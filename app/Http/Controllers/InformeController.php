@@ -532,12 +532,11 @@ class InformeController extends Controller
 			}
 		}
 
-		$query .= $queryCondicion . " GROUP BY linea.pedido_id, cat.nombre ORDER BY ped.id";
+		$query .= $queryCondicion . " GROUP BY ped.id, cat.nombre ORDER BY ped.id";
 		$queryTotal .= $queryCondicion;
 
 		//	Ahora que ya tenemos la query la ejecutamos para obtener el resultado según los filtros
 		$resultado = DB::select( DB::raw($query), $arrayParametros);
-
 		$total = DB::select(DB::raw($queryTotal), $arrayParametros)[0]->importe_total;
 
 		//	Para volver a rellenar los desplegables, etc
