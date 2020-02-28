@@ -738,27 +738,12 @@ class PedidoController extends Controller
 
         try
         {
-            $estadoValidado = EstadoPedido::where('nombre', 'cursado')->first();   //  Recuperamos el nuevo estado
-            
-            $fecha = date("Y-m-d H:i:s");
-
             //  Preparamos una transacción ya que vamos a modificar varios pedidos
             DB::beginTransaction();
 
             foreach($pedidos as $pedido)
             {
-                //  Lo validamos
-                $pedido->estado_pedido_id = $estadoValidado->id;
-                $pedido->fecha_pedido = $fecha;
-                $pedido->save();
-
-                //  Registramos el nuevo cambio de estado de estado
-                HistoricoEstadoPedido::create([
-                    'pedido_id' => $pedido->id,
-                    'estado' => $estadoValidado->nombre,
-                    'usuario_id' => Auth::user()->id,
-                    'fecha' => date("Y-m-d H:i:s"),
-                ]);
+                $this->cursarPedido($pedido);
             }
 
             DB::commit();
@@ -827,134 +812,158 @@ class PedidoController extends Controller
         return view('pedidos.listarpedidos', compact('pedidos', 'titulo', 'tipoPedidos'));
     }
 
+    //  Se encarga de la lógica y controlar los diferentes casos en los que se puede cursar un pedido y su siguiente estado según las diferentes opciones
+    private function cursarPedido($pedido)
+    {
+        try 
+        {
+            $estado = null;     //  Será el estado con el que se va a quedar guardado el pedido
+
+            $usuario_id = Auth::user()->id;    //  Recuperamos el usuario que ha hecho la validación
+            //  Usados para poner los cambios de estados en el histórico de estados
+            $cursado_nombre = EstadoPedido::where('nombre', 'cursado')->pluck('nombre')->first();
+            $pendiente_nombre = EstadoPedido::where('nombre', 'pendiente_recibir')->pluck('nombre')->first();
+            $fecha = date("Y-m-d H:i:s");
+
+            //  Preparamos una transacción ya que vamos a modificar varios pedidos
+            DB::beginTransaction();
+
+            //  Dependiendo de si ya se ha solicitado al proveedor, el pedido pasará a cursado para que Virginia avise al proveedor o pasará a pendiente de recibir
+            if($pedido->solicitado_al_proveedor)
+            {
+                //  Será el estado con el que se va a quedar guardado el pedido
+                $estado = EstadoPedido::where('nombre', 'pendiente_recibir')->first();
+
+                //  Va a pasara pendiente de recibir 
+                HistoricoEstadoPedido::create([
+                    'pedido_id' => $pedido->id,
+                    'estado' => $cursado_nombre,
+                    'usuario_id' => $usuario_id,
+                    'fecha' => $fecha,
+                ]);
+            }
+            else if($pedido->ya_recibido)
+            {
+                //  Será el estado con el que se va a quedar guardado el pedido
+                $estado = EstadoPedido::where('nombre', 'finalizado')->first();
+
+                //  Va a pasar a cursado, pero también 
+                HistoricoEstadoPedido::create([
+                    'pedido_id' => $pedido->id,
+                    'estado' => $cursado_nombre,
+                    'usuario_id' => $usuario_id,
+                    'fecha' => $fecha,
+                ]);
+
+                //  Va a pasara pendiente de recibir, pero también 
+                HistoricoEstadoPedido::create([
+                    'pedido_id' => $pedido->id,
+                    'estado' => $pendiente_nombre,
+                    'usuario_id' => $usuario_id,
+                    'fecha' => $fecha,
+                ]);
+            }
+            else
+            {
+                //  Será el estado con el que se va a quedar guardado el pedido
+                $estado = EstadoPedido::where('nombre', 'cursado')->first();
+            }
+
+            //  Lo cursamos
+            $pedido->estado_pedido_id = $estado->id;
+            $pedido->fecha_pedido = $fecha;
+            $pedido->save();
+
+            //  Registramos el nuevo cambio de estado de estado
+            HistoricoEstadoPedido::create([
+                'pedido_id' => $pedido->id,
+                'estado' => $estado->nombre,
+                'usuario_id' => $usuario_id,
+                'fecha' => $fecha,
+            ]);
+
+            //  Hacemos el commit de lo que hemos insertado en la BBDD
+            DB::commit();
+        }
+        catch (\Exception $e) 
+        {
+            //  Si hay cualquier problema hacemos rollback
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
     //	Maraca un pedido como cursado
     public function cursar(Request $request, Pedido $pedido)
     {
         //  Antes de nada comprobamos que el usuario tiene permiso para trabajar con el pedido con ese departamento-campo
         if(Auth::user()->comprobarDepartamentoYCampo($pedido->departamento_id, $pedido->campo_id) && !$pedido->cancelado)
         {
-            if($pedido->estadoPedido->nombre == "validado")
+            $mensaje = array();
+
+            try
             {
-                $mensaje = "";
-                $estado;        //  Aquí guardaremos el estado del pedido dependiendo del caso en el que nos encontremos
-
-                try 
+                //  Comprobamos que esté siempre en estado de validado antes de ser cursado
+                if($pedido->estadoPedido->nombre == "validado")
                 {
-                    $usuario = Auth::user();    //  Recuperamos el usuario que ha hecho la validación
-                    $cursado_nombre = EstadoPedido::where('nombre', 'cursado')->pluck('nombre')->first();
-                    $pendiente_nombre = EstadoPedido::where('nombre', 'pendiente_recibir')->pluck('nombre')->first();
-                    $fecha = date("Y-m-d H:i:s");
+                    $this->cursarPedido($pedido);
 
-                    //  Dependiendo de si ya se ha solicitado al proveedor, el pedido pasará a cursado para que Virginia avise al proveedor o pasará a pendiente de recibir
+                    //  Ya se ha comunicado al proveedor del pedido previamente
                     if($pedido->solicitado_al_proveedor)
                     {
-                        $estado = EstadoPedido::where('nombre', 'pendiente_recibir')->first();
+                        $mensaje = [
+                            'mensaje' => 'Pedido ' . $pedido->id . ' cursado correctamente. Como el técnico ya se ha puesto en contacto con el proveedor, el pedido pasa a estar pendiente de recibir',
+                            'estado' => 'Exito',
+                        ];
 
-                        //  Va a pasara pendiente de recibir, pero también 
-                        HistoricoEstadoPedido::create([
-                            'pedido_id' => $pedido->id,
-                            'estado' => $cursado_nombre,
-                            'usuario_id' => $usuario->id,
-                            'fecha' => $fecha,
-                        ]);
-
-                        if($request->ajax())
-                        {
-                            $mensaje = [
-                                'mensaje' => 'Pedido ' . $pedido->id . ' cursado correctamente. Como el técnico ya se ha puesto en contacto con el proveedor, el pedido pasa a estar pendiente de recibir',
-                                'estado' => 'Exito'
-                            ];
-                        }
-                        else
-                        {
-                            Session::flash('exito', 'Pedido cursado correctamente. Como el técnico ya se ha puesto en contacto con el proveedor, el pedido pasa a estar pendiente de recibir');
-                        }
+                        Session::flash('exito', $mensaje['mensaje']);
                     }
+                    //  Pedido urgente que ya se ha solicitado al proveedor y ha sido entregado
                     else if($pedido->ya_recibido)
                     {
-                        $estado = EstadoPedido::where('nombre', 'finalizado')->first();
+                        $mensaje = [
+                             'mensaje ' . $pedido->id . ' cursado correctamente. Como el material ya se ha recibido se ha marcado el pedido como finalizado. ¡OJO! Hay que comunicar el pedido al proveedor igualmente!',
+                             'estado' => 'Exito',
+                        ];
 
-                        //  Va a pasara pendiente de recibir, pero también 
-                        HistoricoEstadoPedido::create([
-                            'pedido_id' => $pedido->id,
-                            'estado' => $cursado_nombre,
-                            'usuario_id' => $usuario->id,
-                            'fecha' => $fecha,
-                        ]);
-
-                        //  Va a pasara pendiente de recibir, pero también 
-                        HistoricoEstadoPedido::create([
-                            'pedido_id' => $pedido->id,
-                            'estado' => $pendiente_nombre,
-                            'usuario_id' => $usuario->id,
-                            'fecha' => $fecha,
-                        ]);
-
-                        if($request->ajax())
-                        {
-                            $mensaje = [
-                                'mensaje' => 'Pedido ' . $pedido->id . ' cursado correctamente. Como el material ya se ha recibido se ha marcado el pedido como finalizado. ¡OJO! Hay que comunicar el pedido al proveedor igualmente!',
-                                'estado' => 'Exito'
-                            ];
-                        }
-                        else
-                        {
-                            Session::flash('exito', 'Pedido cursado correctamente. Como el material ya se ha recibido se ha marcado el pedido como finalizado. ¡OJO! Hay que comunicar el pedido al proveedor igualmente!');
-                        }
+                        Session::flash('exito', $mensaje['mensaje']);
                     }
                     else
-                    {
-                        $estado = EstadoPedido::where('nombre', 'cursado')->first();
-
-                        if($request->ajax())
-                        {
-                            $mensaje = [
-                                'mensaje' => 'Pedido ' . $pedido->id . ' cursado correctamente',
-                                'estado' => 'Exito'
-                            ];
-                        }
-                        else
-                        {
-                            Session::flash('exito', 'Pedido cursado correctamente');
-                        }
-                    }
-
-                    //  Lo cursamos
-                    $pedido->estado_pedido_id = $estado->id;
-                    $pedido->fecha_pedido = $fecha;
-                    $pedido->save();
-
-                    //  Registramos el nuevo cambio de estado de estado
-                    HistoricoEstadoPedido::create([
-                        'pedido_id' => $pedido->id,
-                        'estado' => $estado->nombre,
-                        'usuario_id' => $usuario->id,
-                        'fecha' => $fecha,
-                    ]);
-                } 
-                catch (\Exception $e) 
-                {
-                    if($request->ajax())
                     {
                         $mensaje = [
-                            'mensaje' => 'No se ha podido cursar el pedido, contacta con el administrador',
-                            'estado' => 'Error',
-                        ];  
+                            'mensaje' => 'Pedido cursado correctamente',
+                            'estado' => 'Exito',
+                        ];
+
+                        Session::flash('exito', $mensaje['mensaje']);
                     }
-                    else
-                    {
-                        Session::flash('error', 'No se ha podido cursar el pedido, contacte con el administrador');
-                    }
-                } 
-                
+                }
+                else
+                {
+                    $mensaje = [
+                        'mensaje' => 'Parece ser que el pedido no está validado todavía, contacta con el administrador',
+                        'estado' => 'Exito',
+                    ];
+
+                    Session::flash('exito', $mensaje['mensaje']);
+                }
+            }
+            catch(\Exception $e)
+            {
+                $mensaje = [
+                    'No se ha podido cursar el pedido, contacta con el administrador',
+                    'estado' => 'Error',
+                ];
+
+                Session::flash('error', $mensaje['mensaje']);
+            }
+            //  Se haya guardado correctamente o haya saltado una excepción comprobamos por donde nos ha llegado la petición y devolvemos la respuesta.
+            finally
+            {
                 if($request->ajax())
                     return response()->json($mensaje);
                 else
                     return redirect()->route('pedidos.verdetalles', $pedido);
-            }
-            else
-            {
-                return back();
             }
         }
         else
