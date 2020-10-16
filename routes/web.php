@@ -15,6 +15,25 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Route::post('/campos/{campo}/direcciones', 'CampoController@direcciones');
+// Route::post('/pedidos/{pedido}/observaciones', 'PedidoController@observaciones');
+// Route::post('/campos/{campo}/departamentos', 'CampoController@departamentos');
+// Route::get('/departamentos/{departamento}/borrar', 'DepartamentoController@borrar');
+
+
+//	Ya no hace falta tenerlas aquí ya que hemos empezado a usar el planificador de tareas de Laravel /console/kernel.php
+//	Rutas tareas programadas
+// Route::get('/pedidos/comprobarpedidospendientescomunicar', 'UtilController@comprobarpedidospendientescomunicar');		//	Envío diario de correos con los pedidos pendientes de comunicar al proveedor
+// Route::get('/pedidos/comprobarpedidospendientescursar', 'UtilController@comprobarpedidospendientescursar');
+// Route::get('/pedidos/comprobarpedidospendientesvalidar', 'UtilController@comprobarpedidospendientesvalidar');
+////////////////
+
+///////////////////		BORRAR	///////////////////
+// Route::get('/usuarios/{usuario}/campossegundepartamento/{departamento}', 'UserController@camposSegunDepartamento');
+// Route::get('/usuarios/{usuario}/departamentosseguncampo/{campo}', 'UserController@departamentosSegunCampo');
+// Route::get('/test', 'UtilController@comprobarpedidospendientescomunicar');
+///////////////////		BORRAR	///////////////////
+
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
@@ -81,6 +100,7 @@ Route::middleware(['auth'])->group(function(){
 		Route::post('/campos/{campo}/direcciones', 'CampoController@direcciones')->middleware('has.permission:pedidos.crear');
 		Route::get('/campos/{campo}/editarsociedades', 'CampoController@editarsociedades')->name('campos.editarsociedades')->middleware('has.permission:campos.editarsociedades');
 		Route::put('/campos/{campo}/actualizarsociedades', 'CampoController@actualizarsociedades')->name('campos.actualizarsociedades')->middleware('has.permission:campos.editarsociedades');
+		// Route::post('/campos/{campo}/departamentos', 'CampoController@departamentos')->middleware('has.permission:pedidos.crear');
 		Route::get('/campos/{campo}/editardepartamentos', 'CampoController@editardepartamentos')->name('campos.editardepartamentos')->middleware('has.permission:campos.editardepartamentos');
 		Route::put('/campos/{campo}/actualizardepartamentos', 'CampoController@actualizardepartamentos')->name('campos.actualizardepartamentos')->middleware('has.permission:campos.actualizardepartamentos');
 	////////////////
